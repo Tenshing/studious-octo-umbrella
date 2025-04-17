@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Radar Startups Reales</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 1em; }
+        .startup { background: white; padding: 1em; margin-bottom: 1em; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .nivel { font-size: 1.2em; margin-right: 10px; }
+        a { text-decoration: none; color: #007BFF; }
+    </style>
+</head>
+<body>
+    <h1>📡 Radar Startups Reales – Product Hunt</h1>
+    {% for s in startups %}
+    <div class="startup">
+        <span class="nivel">{{ s.nivel }}</span>
+        <strong>{{ s.nombre }}</strong><br>
+        <small>{{ s.fecha }} – {{ s.sector }}</small><br>
+        <a href="{{ s.enlace }}" target="_blank">Ver en Product Hunt</a>
+    </div>
+    {% endfor %}
+</body>
+</html>
