@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Radar de Startups</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f2f2f2; margin: 0; padding: 1em; }
+        .startup { background: white; margin-bottom: 1em; padding: 1em; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .nivel { font-size: 1.5em; margin-right: 10px; }
+        a { text-decoration: none; color: #007BFF; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Radar de Startups Emergentes</h1>
+    {% for startup in startups %}
+    <div class="startup">
+        <span class="nivel">{{ startup.nivel }}</span>
+        <strong>{{ startup.nombre }}</strong> <br>
+        <small>{{ startup.sector }} – Detectada: {{ startup.fecha }}</small><br>
+        <a href="{{ startup.enlace }}" target="_blank">Ver más</a>
+    </div>
+    {% endfor %}
+</body>
+</html>
