@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Radar de Startups Emergentes</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .startup { background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .startup h2 { margin: 0; }
+        .startup p { margin: 5px 0; }
+        .btn { margin-top: 8px; display: inline-block; background-color: #007bff; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Radar de Startups Emergentes</h1>
+    {% for s in startups %}
+        <div class="startup">
+            <h2>{{ s.nombre }}</h2>
+            <p><strong>Sector:</strong> {{ s.sector }}</p>
+            <p><strong>País:</strong> {{ s.pais }}</p>
+            <p><strong>Fundada en:</strong> {{ s.fecha_fundacion }}</p>
+            <p><strong>Detectada:</strong> {{ s.fecha_deteccion }}</p>
+            <a href="{{ s.enlace_producthunt }}" class="btn" target="_blank">🌐 Ver en Product Hunt</a>
+            <a href="https://www.crunchbase.com/discover/organization.companies?q={{ s.nombre | replace(' ', '%20') }}" class="btn" target="_blank">📊 Ver en Crunchbase</a>
+        </div>
+    {% endfor %}
+</body>
+</html>
