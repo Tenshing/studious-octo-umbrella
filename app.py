@@ -3,7 +3,6 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 import os
-import time
 
 app = Flask(__name__)
 
@@ -67,9 +66,7 @@ def obtener_startups_ph():
                 "fecha": datetime.today().strftime("%Y-%m-%d"),
                 "nivel": "🟢"
             })
-            time.sleep(1)  # evitar ser bloqueado por scraping
 
-    # eliminar duplicados por nombre
     unicos = []
     nombres_vistos = set()
     for s in startups:
