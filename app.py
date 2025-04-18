@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 import os
+import time
 
 app = Flask(__name__)
 
@@ -16,10 +17,10 @@ def registrar_startup(nombre):
     with open("enviadas.txt", "a") as f:
         f.write(nombre + "\n")
 
-def enviar_alerta(nombre, sector, enlace):
+def enviar_alerta(nombre, sector, enlace, sitio_web):
     TOKEN = "7506722284:AAGd72I5TMnWVOyft0XdkARISQM2cRxzCfc"
     CHAT_ID = "6368490260"
-    mensaje = f"🚨 NUEVA STARTUP DETECTADA 🚀\n\nNombre: {nombre}\nSector: {sector}\nMás info: {enlace}"
+    mensaje = f"🚨 NUEVA STARTUP DETECTADA 🚀\n\nNombre: {nombre}\nSector: {sector}\nSitio: {sitio_web}\nMás info: {enlace}"
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     payload = {
         "chat_id": CHAT_ID,
@@ -30,6 +31,18 @@ def enviar_alerta(nombre, sector, enlace):
         print("✅ Telegram:", response.status_code, response.text)
     except Exception as e:
         print("❌ Error al enviar mensaje:", str(e))
+
+def obtener_sitio_web(url_post):
+    try:
+        headers = {"User-Agent": "Mozilla/5.0"}
+        r = requests.get(url_post, headers=headers, timeout=10)
+        soup = BeautifulSoup(r.content, "html.parser")
+        link_tag = soup.find("a", attrs={"data-test": "post-visit-website-button"})
+        if link_tag and link_tag.get("href"):
+            return link_tag["href"]
+    except:
+        return "No encontrado"
+    return "No encontrado"
 
 def obtener_startups_ph():
     url = "https://www.producthunt.com"
@@ -44,15 +57,19 @@ def obtener_startups_ph():
         href = tag["href"]
         if "/posts/" in href and tag.text.strip():
             nombre = tag.text.strip()
-            enlace = "https://www.producthunt.com" + href
+            enlace_post = "https://www.producthunt.com" + href
+            sitio_web = obtener_sitio_web(enlace_post)
             startups.append({
                 "nombre": nombre,
-                "enlace": enlace,
+                "enlace": enlace_post,
+                "sitio_web": sitio_web,
                 "sector": "Por clasificar",
                 "fecha": datetime.today().strftime("%Y-%m-%d"),
                 "nivel": "🟢"
             })
+            time.sleep(1)  # evitar ser bloqueado por scraping
 
+    # eliminar duplicados por nombre
     unicos = []
     nombres_vistos = set()
     for s in startups:
@@ -74,7 +91,7 @@ def test_alerta():
     nuevas = [s for s in startups if s["nombre"] not in enviadas]
 
     for s in nuevas:
-        enviar_alerta(s["nombre"], s["sector"], s["enlace"])
+        enviar_alerta(s["nombre"], s["sector"], s["enlace"], s["sitio_web"])
         registrar_startup(s["nombre"])
 
     if nuevas:
