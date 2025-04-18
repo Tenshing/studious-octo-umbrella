@@ -3,33 +3,10 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 import os
+import json
 
 app = Flask(__name__)
-
-def leer_startups_enviadas():
-    if not os.path.exists("enviadas.txt"):
-        return set()
-    with open("enviadas.txt", "r") as f:
-        return set(line.strip() for line in f.readlines())
-
-def registrar_startup(nombre):
-    with open("enviadas.txt", "a") as f:
-        f.write(nombre + "\n")
-
-def enviar_alerta(nombre, sector, enlace, sitio_web):
-    TOKEN = "7506722284:AAGd72I5TMnWVOyft0XdkARISQM2cRxzCfc"
-    CHAT_ID = "6368490260"
-    mensaje = f"🚨 NUEVA STARTUP DETECTADA 🚀\n\nNombre: {nombre}\nSector: {sector}\nSitio: {sitio_web}\nMás info: {enlace}"
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {
-        "chat_id": CHAT_ID,
-        "text": mensaje
-    }
-    try:
-        response = requests.post(url, data=payload)
-        print("✅ Telegram:", response.status_code, response.text)
-    except Exception as e:
-        print("❌ Error al enviar mensaje:", str(e))
+DATA_FILE = "startups.json"
 
 def obtener_sitio_web(url_post):
     try:
@@ -78,28 +55,24 @@ def obtener_startups_ph():
 
 @app.route("/")
 def index():
-    startups = obtener_startups_ph()
+    if not os.path.exists(DATA_FILE):
+        return "No se han detectado startups aún. Ejecuta /test-alerta primero."
+
+    with open(DATA_FILE, "r") as f:
+        startups = json.load(f)
     return render_template("index.html", startups=startups)
 
 @app.route("/test-alerta")
 def test_alerta():
-    enviadas = leer_startups_enviadas()
     startups = obtener_startups_ph()
-    nuevas = [s for s in startups if s["nombre"] not in enviadas]
-
-    for s in nuevas:
-        enviar_alerta(s["nombre"], s["sector"], s["enlace"], s["sitio_web"])
-        registrar_startup(s["nombre"])
-
-    if nuevas:
-        return f"🔔 Se enviaron {len(nuevas)} nuevas alertas a Telegram"
-    else:
-        return "✅ No hay startups nuevas por ahora"
+    with open(DATA_FILE, "w") as f:
+        json.dump(startups, f, indent=2, ensure_ascii=False)
+    return f"✅ Startups actualizadas ({len(startups)} detectadas)."
 
 @app.route("/reset-enviadas")
 def reset_enviadas():
-    if os.path.exists("enviadas.txt"):
-        os.remove("enviadas.txt")
+    if os.path.exists(DATA_FILE):
+        os.remove(DATA_FILE)
     return "🧹 Historial de startups reiniciado."
 
 if __name__ == "__main__":
